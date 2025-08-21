@@ -109,7 +109,7 @@
       </div>
       <div class="p-4 space-y-4">
         <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-blue-800 text-sm">
-          أدخل إعدادات المشروع للمزامنة (قراءة المنتجات) وإعدادات الماسح (جلسات المسح).
+          أدخل إعدادات Firebase مرة واحدة وسيتم استخدامها للمزامنة وجلسات المسح معاً.
         </div>
         <!-- Sync Settings -->
         <div class="space-y-2">
@@ -121,15 +121,7 @@
             <input id="prefix" class="input" placeholder="Prefix (مثال: store1)" />
           </div>
         </div>
-        <!-- Scanner Settings -->
-        <div class="space-y-2">
-          <h4 class="font-semibold text-gray-800">جلسات المسح</h4>
-          <div class="grid grid-cols-1 gap-2">
-            <input id="scannerApiKey" class="input" placeholder="Scanner API Key" />
-            <input id="scannerAuthDomain" class="input" placeholder="Scanner Auth Domain" />
-            <input id="scannerProjectId" class="input" placeholder="Scanner Project ID" />
-          </div>
-        </div>
+        <!-- Scanner Settings merged with Sync: no extra fields needed -->
         <div class="space-y-2">
           <h4 class="font-semibold text-gray-800">اختياري</h4>
           <input id="deviceId" class="input" placeholder="Device ID (يُولد تلقائياً)" />
