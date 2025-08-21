@@ -205,6 +205,8 @@ let html5QrcodeScannerInstance = null;
 let isScanning = false;
 
 function openScannerUI(onResult) {
+  console.log('openScannerUI called');
+  
   // Prevent multiple scanner instances
   if (isScanning) {
     console.log('Scanner already running');
@@ -217,6 +219,7 @@ function openScannerUI(onResult) {
     return;
   }
   
+  console.log('Opening scanner UI');
   overlay.classList.remove('hidden');
   overlay.classList.remove('scanner-leave');
   overlay.classList.add('scanner-enter');
@@ -368,19 +371,27 @@ function startScannerSessionListener() {
 
 // Compatibility listener for legacy fixed doc (scannerSessions/fixed)
 function startFixedScannerCompatListener() {
-  if (!state.scannerDb) return;
+  if (!state.scannerDb) {
+    console.log('Scanner DB not available for fixed listener');
+    return;
+  }
+  
+  console.log('Starting fixed scanner compatibility listener');
   const fixedRef = doc(state.scannerDb, 'scannerSessions', 'fixed');
   let processing = false;
   
   onSnapshot(fixedRef, (snap) => {
     const data = snap.data() || {};
+    console.log('Fixed scanner listener received data:', data);
     
     // Check for scan requests immediately, including on initial load
     if (data.status === 'scanRequested' && !processing) {
       processing = true;
+      console.log('Processing scan request from fixed listener');
       toast('تم استلام طلب مسح من النظام', 'info');
       
       openScannerUI(async (value) => {
+        console.log('Scanned value:', value);
         try {
           await setDoc(fixedRef, { status: 'scanned', scannedValue: value, updatedAt: serverTimestamp() }, { merge: true });
           toast('تم المسح بنجاح', 'success');
@@ -388,9 +399,16 @@ function startFixedScannerCompatListener() {
           console.error('fixed compat write error', e);
           toast('فشل إرسال نتيجة المسح', 'error');
         } finally {
-          setTimeout(() => { processing = false; }, 500);
+          setTimeout(() => { 
+            processing = false; 
+            console.log('Processing flag reset');
+          }, 500);
         }
       });
+    } else if (data.status === 'scanRequested' && processing) {
+      console.log('Scan request already being processed');
+    } else {
+      console.log('No scan request or different status:', data.status);
     }
   }, (err) => {
     console.error('fixed compat listener error', err);
