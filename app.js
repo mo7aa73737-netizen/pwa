@@ -478,91 +478,7 @@ function fillSettingsForm() {
   $('#deviceId').value = s.deviceId || '';
 }
 
-// Check for existing pending scan requests on startup
-async function checkPendingScanRequests() {
-  const s = state.settings || {};
-  if (!state.scannerDb) return;
-  
-  try {
-    // Check fixed scanner session first
-    const fixedRef = doc(state.scannerDb, 'scannerSessions', 'fixed');
-    const fixedSnap = await getDoc(fixedRef);
-    
-    if (fixedSnap.exists()) {
-      const data = fixedSnap.data();
-      // Only process recent requests (within last 5 minutes) to avoid old stale requests
-      const requestTime = data.requestedAt?.toDate?.() || new Date(data.requestedAt || 0);
-      const now = new Date();
-      const timeDiff = now - requestTime;
-      const fiveMinutes = 5 * 60 * 1000;
-      
-      if (data && data.status === 'scanRequested' && timeDiff < fiveMinutes) {
-        toast('تم العثور على طلب مسح معلق', 'info');
-        openScannerUI(async (value) => {
-          try {
-            await setDoc(fixedRef, { status: 'scanned', scannedValue: value, updatedAt: serverTimestamp() }, { merge: true });
-            toast('تم المسح بنجاح', 'success');
-          } catch (e) {
-            console.error('fixed compat write error', e);
-            toast('فشل إرسال نتيجة المسح', 'error');
-          }
-        });
-        return; // Exit early if we found a valid fixed request
-      } else if (data && data.status === 'scanRequested' && timeDiff >= fiveMinutes) {
-        // Clear old stale requests
-        await setDoc(fixedRef, { status: 'expired', updatedAt: serverTimestamp() }, { merge: true });
-        console.log('Cleared stale scan request');
-      }
-    }
-    
-    // Check device-specific scanner sessions
-    if (s.deviceId) {
-      const sessionsCol = collection(state.scannerDb, 'scannerSessions');
-      const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'scanRequested'));
-      const snap = await getDocs(qSessions);
-      
-      if (!snap.empty) {
-        const docSnap = snap.docs[0];
-        const data = docSnap.data();
-        
-        // Only process recent requests
-        const requestTime = data.createdAt?.toDate?.() || new Date(data.createdAt || 0);
-        const now = new Date();
-        const timeDiff = now - requestTime;
-        const fiveMinutes = 5 * 60 * 1000;
-        
-        if (data && data.type === 'scanBarcode' && timeDiff < fiveMinutes) {
-          toast('تم العثور على طلب مسح معلق', 'info');
-          
-          // mark scanning
-          await setDoc(docSnap.ref, {
-            status: 'scanning', updatedAt: serverTimestamp()
-          }, { merge: true });
-
-          openScannerUI(async (value) => {
-            try {
-              await setDoc(docSnap.ref, {
-                status: 'done', barcode: value, updatedAt: serverTimestamp()
-              }, { merge: true });
-              toast('تم المسح بنجاح', 'success');
-            } catch (e) {
-              console.error(e);
-              toast('فشل إرسال نتيجة المسح', 'error');
-            }
-          });
-        } else if (data && timeDiff >= fiveMinutes) {
-          // Clear old stale requests
-          await setDoc(docSnap.ref, {
-            status: 'expired', updatedAt: serverTimestamp()
-          }, { merge: true });
-          console.log('Cleared stale device scan request');
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Error checking pending scan requests:', e);
-  }
-}
+// No longer checking for pending scan requests on startup
 
 async function boot() {
   state.settings = loadSettings();
@@ -575,9 +491,6 @@ async function boot() {
     startScannerSessionListener();
     startFixedScannerCompatListener();
     fetchProducts();
-    
-    // Check for pending scan requests after initialization
-    setTimeout(() => checkPendingScanRequests(), 1000);
   } else {
     console.error("❌ Firebase not initialized. Please configure settings.");
     toast("يرجى إدخال إعدادات Firebase للاتصال بالنظام", "error");
