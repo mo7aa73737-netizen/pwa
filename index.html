@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>YSK Mobile PWA</title>
+  <title>YSK SALES | موبايل</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2563eb" />
-  <link rel="icon" type="image/png" href="../YSK-SALES.png" />
+  <link rel="icon" type="image/png" href="/public/YSK-SALES.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,6 +14,18 @@
   <style>
     body { font-family: 'Cairo', sans-serif; }
     .modal-bg { background-color: rgba(0,0,0,0.45); }
+
+    /* Scanner modal animations */
+    @keyframes pop-in { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes pop-out { from { transform: scale(1); opacity: 1; } to { transform: scale(0.96); opacity: 0; } }
+    #scannerSection.scanner-enter .scanner-card { animation: pop-in 220ms ease-out; }
+    #scannerSection.scanner-leave .scanner-card { animation: pop-out 180ms ease-in forwards; }
+
+    /* Toast animations */
+    @keyframes slide-in { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slide-out { from { transform: translateY(0); opacity: 1; } to { transform: translateY(12px); opacity: 0; } }
+    .toast { animation: slide-in 180ms ease-out; }
+    .toast.hide { animation: slide-out 150ms ease-in forwards; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 </head>
@@ -21,11 +33,11 @@
   <!-- App Shell -->
   <div id="app" class="min-h-screen flex flex-col">
     <!-- Top Bar -->
-    <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-200">
+    <header class="sticky top-0 z-20 bg-blue-50/90 backdrop-blur border-b border-blue-200">
       <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2">
-          <img src="../YSK-SALES.png" alt="logo" class="w-8 h-8 rounded" />
-          <h1 class="text-lg font-bold text-gray-900">لوحة الموبايل</h1>
+          <img src="/public/YSK-SALES.png" alt="logo" class="w-8 h-8 rounded" />
+          <h1 class="text-lg font-bold text-gray-900">YSK SALES</h1>
         </div>
         <div class="flex items-center gap-2">
           <span id="syncStatus" class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">غير متصل</span>
@@ -75,18 +87,23 @@
         <div id="emptyState" class="hidden text-center text-gray-500 py-10">لا توجد بيانات منتجات متاحة</div>
       </section>
 
-      <!-- Scanner Container -->
-      <div id="scannerSection" class="hidden">
-        <div class="bg-white rounded-xl shadow p-3">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="font-bold text-gray-800">ماسح الباركود</h3>
-            <button id="closeScannerBtn" class="p-2 rounded-lg hover:bg-gray-100" aria-label="إغلاق">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-600">
-                <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
-              </svg>
-            </button>
+      <!-- Scanner Overlay Modal -->
+      <div id="scannerSection" class="fixed inset-0 hidden z-50">
+        <div id="scannerBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div id="scannerModal" class="relative w-full h-full p-4 flex items-center justify-center">
+          <div class="scanner-card relative w-full h-full sm:max-w-md sm:h-[80vh] bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
+            <div class="flex items-center justify-between p-3 border-b border-white/40">
+              <h3 class="font-bold text-gray-800">ماسح الباركود</h3>
+              <button id="closeScannerBtn" class="p-2 rounded-lg hover:bg-white/50" aria-label="إغلاق">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-700">
+                  <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div class="p-3 h-[calc(100%-56px)]">
+              <div id="reader" class="w-full h-full"></div>
+            </div>
           </div>
-          <div id="reader" class="w-full"></div>
         </div>
       </div>
 

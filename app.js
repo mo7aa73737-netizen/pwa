@@ -43,10 +43,25 @@ function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
 function toast(msg, type = 'info') {
   const host = $('#toasts');
   const el = document.createElement('div');
-  el.className = `px-4 py-2 rounded-lg shadow text-white ${type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-gray-800'}`;
-  el.textContent = msg;
+  el.className = `toast flex items-center gap-2 px-4 py-2 rounded-xl shadow-lg text-white backdrop-blur-md bg-black/50 border border-white/20 whitespace-nowrap overflow-hidden text-ellipsis`;
+  const icon = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  icon.setAttribute('viewBox','0 0 24 24');
+  icon.setAttribute('fill','currentColor');
+  icon.setAttribute('class','w-5 h-5');
+  icon.innerHTML = type === 'error'
+    ? '<path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5zM10.72 8.47a.75.75 0 011.06 0L12 8.69l.22-.22a.75.75 0 111.06 1.06L13.06 9.75l.22.22a.75.75 0 11-1.06 1.06L12 10.81l-.22.22a.75.75 0 01-1.06-1.06l.22-.22-.22-.22a.75.75 0 010-1.06zM9.75 15a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z" clip-rule="evenodd"/>'
+    : type === 'success'
+    ? '<path fill-rule="evenodd" d="M10.28 15.22a.75.75 0 001.06 0l5.25-5.25a.75.75 0 00-1.06-1.06L10.81 13.44 8.47 11.1a.75.75 0 10-1.06 1.06l2.87 3.06z" clip-rule="evenodd"/>'
+    : '<path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5zM12 6a.75.75 0 01.75.75v5.25a.75.75 0 01-1.5 0V6.75A.75.75 0 0112 6zm0 9a.75.75 0 100 1.5A.75.75 0 0012 15z" clip-rule="evenodd"/>';
+  const text = document.createElement('div');
+  text.textContent = msg;
+  const closeBtn = document.createElement('button');
+  closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" /></svg>';
+  closeBtn.className = 'p-1 rounded hover:bg-white/10';
+  closeBtn.onclick = () => { el.classList.add('hide'); setTimeout(()=>el.remove(),160); };
+  el.appendChild(icon); el.appendChild(text); el.appendChild(closeBtn);
   host.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  setTimeout(() => { el.classList.add('hide'); setTimeout(()=>el.remove(),160); }, 3000);
 }
 
 function updateStatus(connected, label) {
@@ -165,7 +180,10 @@ async function fetchProducts() {
 // Manual scanner UI
 let html5QrcodeScannerInstance = null;
 function openScannerUI(onResult) {
-  $('#scannerSection').classList.remove('hidden');
+  const overlay = $('#scannerSection');
+  overlay.classList.remove('hidden');
+  overlay.classList.remove('scanner-leave');
+  overlay.classList.add('scanner-enter');
   const readerId = 'reader';
   const config = { fps: 10, qrbox: { width: 240, height: 160 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 };
 
@@ -190,7 +208,10 @@ function openScannerUI(onResult) {
 }
 
 function closeScannerUI() {
-  $('#scannerSection').classList.add('hidden');
+  const overlay = $('#scannerSection');
+  overlay.classList.remove('scanner-enter');
+  overlay.classList.add('scanner-leave');
+  setTimeout(()=>{ overlay.classList.add('hidden'); overlay.classList.remove('scanner-leave'); }, 160);
   if (html5QrcodeScannerInstance) {
     html5QrcodeScannerInstance.stop().then(() => html5QrcodeScannerInstance.clear()).catch(() => {});
     html5QrcodeScannerInstance = null;
