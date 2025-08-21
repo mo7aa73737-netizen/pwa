@@ -79,19 +79,9 @@ async function initFirebaseApps() {
     }
   }
 
-  // Init scanner app (for scannerSessions)
-  if (s.scannerApiKey && s.scannerProjectId) {
-    try {
-      state.scannerApp = initializeApp({
-        apiKey: s.scannerApiKey,
-        authDomain: s.scannerAuthDomain || undefined,
-        projectId: s.scannerProjectId,
-      }, 'ysk-scanner');
-      state.scannerDb = getFirestore(state.scannerApp);
-    } catch (e) {
-      console.error('scanner init error', e);
-    }
-  }
+  // Use the same Firebase app for scanner sessions
+  state.scannerApp = state.syncApp;
+  state.scannerDb = state.syncDb;
 }
 
 async function testConnection() {
@@ -106,7 +96,7 @@ async function testConnection() {
     } else {
       toast('من فضلك أدخل إعدادات المزامنة كاملة', 'error');
     }
-    if (state.scannerDb) {
+    if (state.syncDb) {
       toast('اتصال الماسح جاهز ✅', 'success');
     }
   } catch (e) {
@@ -291,9 +281,6 @@ function bindUI() {
       syncAuthDomain: $('#syncAuthDomain').value.trim(),
       syncProjectId: $('#syncProjectId').value.trim(),
       prefix: $('#prefix').value.trim(),
-      scannerApiKey: $('#scannerApiKey').value.trim(),
-      scannerAuthDomain: $('#scannerAuthDomain').value.trim(),
-      scannerProjectId: $('#scannerProjectId').value.trim(),
       deviceId: ($('#deviceId').value || '').trim() || state.settings?.deviceId || `dev_${uid()}`,
     };
     saveSettings(newS);
@@ -328,10 +315,7 @@ function fillSettingsForm() {
   $('#syncAuthDomain').value = s.syncAuthDomain || '';
   $('#syncProjectId').value = s.syncProjectId || '';
   $('#prefix').value = s.prefix || '';
-  $('#scannerApiKey').value = s.scannerApiKey || '';
-  $('#scannerAuthDomain').value = s.scannerAuthDomain || '';
-  $('#scannerProjectId').value = s.scannerProjectId || '';
-  $('#deviceId').value = s.deviceId || '';
+        $('#deviceId').value = s.deviceId || '';
 }
 
 async function boot() {
