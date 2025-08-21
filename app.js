@@ -43,35 +43,43 @@ function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
 function toast(msg, type = 'info') {
   const host = $('#toasts');
   const el = document.createElement('div');
-  el.className = `toast flex items-center gap-2 px-4 py-2 rounded-xl shadow-lg text-white backdrop-blur-md bg-black/50 border border-white/20 whitespace-nowrap overflow-hidden text-ellipsis`;
-  const icon = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  icon.setAttribute('viewBox','0 0 24 24');
-  icon.setAttribute('fill','currentColor');
-  icon.setAttribute('class','w-5 h-5');
-  icon.innerHTML = type === 'error'
-    ? '<path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5zM10.72 8.47a.75.75 0 011.06 0L12 8.69l.22-.22a.75.75 0 111.06 1.06L13.06 9.75l.22.22a.75.75 0 11-1.06 1.06L12 10.81l-.22.22a.75.75 0 01-1.06-1.06l.22-.22-.22-.22a.75.75 0 010-1.06zM9.75 15a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z" clip-rule="evenodd"/>'
-    : type === 'success'
-    ? '<path fill-rule="evenodd" d="M10.28 15.22a.75.75 0 001.06 0l5.25-5.25a.75.75 0 00-1.06-1.06L10.81 13.44 8.47 11.1a.75.75 0 10-1.06 1.06l2.87 3.06z" clip-rule="evenodd"/>'
-    : '<path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5zM12 6a.75.75 0 01.75.75v5.25a.75.75 0 01-1.5 0V6.75A.75.75 0 0112 6zm0 9a.75.75 0 100 1.5A.75.75 0 0012 15z" clip-rule="evenodd"/>';
+  el.className = `toast flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl text-white backdrop-blur-md bg-black/40 border border-white/20 max-w-sm`;
+  
+  const iconEl = document.createElement('i');
+  iconEl.className = `ph text-lg ${
+    type === 'error' ? 'ph-x-circle text-red-400' : 
+    type === 'success' ? 'ph-check-circle text-green-400' : 
+    'ph-info text-blue-400'
+  }`;
+  
   const text = document.createElement('div');
+  text.className = 'flex-1 text-sm font-medium truncate';
   text.textContent = msg;
+  
   const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" /></svg>';
-  closeBtn.className = 'p-1 rounded hover:bg-white/10';
-  closeBtn.onclick = () => { el.classList.add('hide'); setTimeout(()=>el.remove(),160); };
-  el.appendChild(icon); el.appendChild(text); el.appendChild(closeBtn);
+  closeBtn.innerHTML = '<i class="ph ph-x text-sm"></i>';
+  closeBtn.className = 'p-1 rounded-lg hover:bg-white/20 transition-all';
+  closeBtn.onclick = () => { el.classList.add('hide'); setTimeout(()=>el.remove(),200); };
+  
+  el.appendChild(iconEl); 
+  el.appendChild(text); 
+  el.appendChild(closeBtn);
   host.appendChild(el);
-  setTimeout(() => { el.classList.add('hide'); setTimeout(()=>el.remove(),160); }, 3000);
+  
+  setTimeout(() => { 
+    el.classList.add('hide'); 
+    setTimeout(()=>el.remove(),200); 
+  }, 4000);
 }
 
 function updateStatus(connected, label) {
   const el = $('#syncStatus');
   if (connected) {
-    el.textContent = label || 'متصل';
-    el.className = 'text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200';
+    el.innerHTML = `<i class="ph ph-check-circle text-green-400 me-1"></i>${label || 'متصل'}`;
+    el.className = 'px-3 py-1 rounded-full glass text-xs font-medium text-green-300';
   } else {
-    el.textContent = label || 'غير متصل';
-    el.className = 'text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200';
+    el.innerHTML = `<i class="ph ph-x-circle text-red-400 me-1"></i>${label || 'غير متصل'}`;
+    el.className = 'px-3 py-1 rounded-full glass-dark text-xs font-medium text-red-300';
   }
 }
 
@@ -123,6 +131,7 @@ async function testConnection() {
 function renderProducts() {
   const wrap = $('#productsContainer');
   const empty = $('#emptyState');
+  const countEl = $('#productsCount');
   const q = ($('#searchInput').value || '').trim().toLowerCase();
 
   const filtered = state.products.filter(p => {
@@ -131,6 +140,8 @@ function renderProducts() {
     const supplier = (p.supplier || '').toLowerCase();
     return !q || name.includes(q) || barcode.includes(q) || supplier.includes(q);
   });
+
+  countEl.textContent = `${filtered.length} منتج`;
 
   wrap.innerHTML = '';
   if (!filtered.length) {
@@ -141,21 +152,28 @@ function renderProducts() {
 
   for (const p of filtered) {
     const card = document.createElement('div');
-    card.className = 'bg-white rounded-xl shadow p-3 flex items-center justify-between';
+    card.className = 'product-card rounded-2xl p-4 flex items-center justify-between text-gray-800';
 
     const left = document.createElement('div');
     left.className = 'flex-1';
     left.innerHTML = `
-      <div class="font-semibold text-gray-900">${p.name || '—'}</div>
-      <div class="text-sm text-gray-500">باركود: ${p.barcode || '—'}</div>
+      <div class="font-semibold text-lg mb-1">${p.name || '—'}</div>
+      <div class="text-sm opacity-70 flex items-center gap-2">
+        <i class="ph ph-barcode"></i>
+        ${p.barcode || '—'}
+      </div>
+      ${p.supplier ? `<div class="text-xs opacity-60 mt-1">${p.supplier}</div>` : ''}
     `;
 
-    const price = document.createElement('div');
-    price.className = 'text-blue-600 font-bold';
-    price.textContent = (p.price || 0) + ' ج.م';
+    const right = document.createElement('div');
+    right.className = 'text-left';
+    right.innerHTML = `
+      <div class="text-2xl font-bold text-indigo-600">${(p.price || 0).toFixed(2)}</div>
+      <div class="text-sm opacity-70">ج.م</div>
+    `;
 
     card.appendChild(left);
-    card.appendChild(price);
+    card.appendChild(right);
     wrap.appendChild(card);
   }
 }
@@ -211,7 +229,7 @@ function closeScannerUI() {
   const overlay = $('#scannerSection');
   overlay.classList.remove('scanner-enter');
   overlay.classList.add('scanner-leave');
-  setTimeout(()=>{ overlay.classList.add('hidden'); overlay.classList.remove('scanner-leave'); }, 160);
+  setTimeout(()=>{ overlay.classList.add('hidden'); overlay.classList.remove('scanner-leave'); }, 200);
   if (html5QrcodeScannerInstance) {
     html5QrcodeScannerInstance.stop().then(() => html5QrcodeScannerInstance.clear()).catch(() => {});
     html5QrcodeScannerInstance = null;
@@ -232,7 +250,14 @@ function startScannerSessionListener() {
   const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'pending'));
 
   if (state.unsubscribeScan) state.unsubscribeScan();
+  
+  let isInitialLoad = true;
   state.unsubscribeScan = onSnapshot(qSessions, (snap) => {
+    if (isInitialLoad) {
+      isInitialLoad = false;
+      return; // Skip initial load to prevent auto-opening camera
+    }
+    
     snap.docChanges().forEach(change => {
       if (change.type === 'added' || change.type === 'modified') {
         const data = change.doc.data();
@@ -266,17 +291,25 @@ function startFixedScannerCompatListener() {
   if (!state.scannerDb) return;
   const fixedRef = doc(state.scannerDb, 'scannerSessions', 'fixed');
   let processing = false;
+  let isInitialLoad = true;
+  
   onSnapshot(fixedRef, (snap) => {
     const data = snap.data() || {};
+    
+    if (isInitialLoad) {
+      isInitialLoad = false;
+      return; // Skip initial load to prevent auto-opening camera
+    }
+    
     if (data.status === 'scanRequested' && !processing) {
       processing = true;
       openScannerUI(async (value) => {
         try {
           await setDoc(fixedRef, { status: 'scanned', scannedValue: value, updatedAt: serverTimestamp() }, { merge: true });
-          toast('تم المسح (وضع التوافق)', 'success');
+          toast('تم المسح بنجاح', 'success');
         } catch (e) {
           console.error('fixed compat write error', e);
-          toast('فشل إرسال نتيجة المسح (توافق)', 'error');
+          toast('فشل إرسال نتيجة المسح', 'error');
         } finally {
           setTimeout(() => { processing = false; }, 500);
         }
@@ -310,6 +343,7 @@ function bindUI() {
     // re-init
     await initFirebaseApps();
     startScannerSessionListener();
+    startFixedScannerCompatListener();
     fetchProducts();
   };
 
@@ -336,7 +370,7 @@ function fillSettingsForm() {
   $('#syncAuthDomain').value = s.syncAuthDomain || '';
   $('#syncProjectId').value = s.syncProjectId || '';
   $('#prefix').value = s.prefix || '';
-        $('#deviceId').value = s.deviceId || '';
+  $('#deviceId').value = s.deviceId || '';
 }
 
 async function boot() {
