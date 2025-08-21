@@ -83,7 +83,7 @@ function toast(msg, type = 'info') {
 function updateStatus(connected, label) {
   const el = $('#syncStatus');
   if (connected) {
-    el.innerHTML = `<i class="fas fa-check-circle text-green-500 me-1"></i>${label || 'متصل'}`;
+    el.innerHTML = `${label || 'متصل'}`;
     el.className = 'px-2 py-1 rounded-full bg-green-50 text-xs font-medium text-green-700';
   } else {
     el.innerHTML = `<i class="fas fa-times-circle text-red-500 me-1"></i>${label || 'غير متصل'}`;
@@ -103,7 +103,7 @@ async function initFirebaseApps() {
         projectId: s.syncProjectId,
       }, 'ysk-sync');
       state.syncDb = getFirestore(state.syncApp);
-      updateStatus(true, 'متصل ✅');
+      updateStatus(true, 'متصل');
     } catch (e) {
       console.error('sync init error', e);
       updateStatus(false, 'فشل المزامنة');
