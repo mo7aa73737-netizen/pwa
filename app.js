@@ -119,12 +119,9 @@ async function testConnection() {
     if (state.syncDb && s.prefix) {
       const productsRef = collection(state.syncDb, `${s.prefix}_products`);
       await getDocs(query(productsRef, where('id', '!=', null)));
-      toast('اتصال المزامنة ناجح ✅', 'success');
+      toast('اتصال Firebase ناجح ✅', 'success');
     } else {
       toast('من فضلك أدخل إعدادات المزامنة كاملة', 'error');
-    }
-    if (state.syncDb) {
-      toast('اتصال الماسح جاهز ✅', 'success');
     }
   } catch (e) {
     console.error(e);
@@ -192,7 +189,10 @@ async function fetchProducts() {
     snap.forEach(doc => list.push(doc.data()));
     state.products = list;
     renderProducts();
-    toast('تم تحديث المنتجات', 'success');
+    // Only show success toast if products were actually loaded
+    if (list.length > 0) {
+      toast('تم تحديث المنتجات', 'success');
+    }
   } catch (e) {
     console.error(e);
     toast('فشل تحميل المنتجات', 'error');
@@ -207,7 +207,22 @@ function openScannerUI(onResult) {
   overlay.classList.remove('scanner-leave');
   overlay.classList.add('scanner-enter');
   const readerId = 'reader';
-  const config = { fps: 10, qrbox: { width: 240, height: 160 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 };
+  
+  // Fullscreen camera config
+  const config = { 
+    fps: 10, 
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      // Square QR box in the center
+      const minEdgePercentage = 0.7;
+      const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+      const qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+      return {
+        width: qrboxSize,
+        height: qrboxSize
+      };
+    },
+    rememberLastUsedCamera: true
+  };
 
   if (html5QrcodeScannerInstance) {
     html5QrcodeScannerInstance.clear().catch(() => {});
