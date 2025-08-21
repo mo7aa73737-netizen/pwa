@@ -4,7 +4,7 @@
 // - html5-qrcode for camera scanning
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, collection, getDocs, query, where, onSnapshot, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs, query, where, onSnapshot, doc, setDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const STORAGE_KEY = 'ysk_mobile_pwa_settings_v1';
 
@@ -16,10 +16,6 @@ const state = {
   settings: null,
   unsubscribeScan: null,
   products: [],
-  customers: [],
-  invoices: [],
-  expenses: [],
-  currentTab: 'products'
 };
 
 function loadSettings() {
@@ -83,7 +79,7 @@ function toast(msg, type = 'info') {
 function updateStatus(connected, label) {
   const el = $('#syncStatus');
   if (connected) {
-    el.innerHTML = `${label || 'متصل'}`;
+    el.innerHTML = `<i class="fas fa-check-circle text-green-500 me-1"></i>${label || 'متصل'}`;
     el.className = 'px-2 py-1 rounded-full bg-green-50 text-xs font-medium text-green-700';
   } else {
     el.innerHTML = `<i class="fas fa-times-circle text-red-500 me-1"></i>${label || 'غير متصل'}`;
@@ -103,7 +99,7 @@ async function initFirebaseApps() {
         projectId: s.syncProjectId,
       }, 'ysk-sync');
       state.syncDb = getFirestore(state.syncApp);
-      updateStatus(true, 'متصل');
+      updateStatus(true, 'متصل ');
     } catch (e) {
       console.error('sync init error', e);
       updateStatus(false, 'فشل المزامنة');
@@ -133,31 +129,9 @@ async function testConnection() {
   }
 }
 
-function switchTab(tabName) {
-  // Update tab buttons
-  $all('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  $(`#tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
-  
-  // Update content
-  $all('.tab-content').forEach(content => content.classList.add('hidden'));
-  $(`#content${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.remove('hidden');
-  
-  state.currentTab = tabName;
-  renderCurrentTab();
-}
-
-function renderCurrentTab() {
-  switch(state.currentTab) {
-    case 'products': renderProducts(); break;
-    case 'customers': renderCustomers(); break;
-    case 'invoices': renderInvoices(); break;
-    case 'expenses': renderExpenses(); break;
-  }
-}
-
 function renderProducts() {
   const wrap = $('#productsContainer');
-  const empty = $('#emptyProducts');
+  const empty = $('#emptyState');
   const countEl = $('#productsCount');
   const q = ($('#searchInput').value || '').trim().toLowerCase();
 
@@ -205,190 +179,23 @@ function renderProducts() {
   }
 }
 
-function renderCustomers() {
-  const wrap = $('#customersContainer');
-  const empty = $('#emptyCustomers');
-  const countEl = $('#customersCount');
-  const q = ($('#searchInput').value || '').trim().toLowerCase();
-
-  const filtered = state.customers.filter(c => {
-    const name = (c.name || '').toLowerCase();
-    const phone = (c.phone || '').toLowerCase();
-    const address = (c.address || '').toLowerCase();
-    return !q || name.includes(q) || phone.includes(q) || address.includes(q);
-  });
-
-  countEl.textContent = `${filtered.length} عميل`;
-
-  wrap.innerHTML = '';
-  if (!filtered.length) {
-    empty.classList.remove('hidden');
-    return;
-  }
-  empty.classList.add('hidden');
-
-  for (const c of filtered) {
-    const card = document.createElement('div');
-    card.className = 'product-card rounded-lg p-3 flex items-center justify-between';
-
-    const left = document.createElement('div');
-    left.className = 'flex-1';
-    left.innerHTML = `
-      <div class="font-semibold text-gray-900 mb-1">${c.name || '—'}</div>
-      <div class="text-sm text-gray-500 flex items-center gap-2">
-        <i class="fas fa-phone"></i>
-        ${c.phone || '—'}
-      </div>
-      ${c.address ? `<div class="text-xs text-gray-400 mt-1">${c.address}</div>` : ''}
-    `;
-
-    const right = document.createElement('div');
-    right.className = 'text-left';
-    right.innerHTML = `
-      <div class="text-lg font-bold text-green-600">${(c.balance || 0).toFixed(2)}</div>
-      <div class="text-xs text-gray-500">رصيد</div>
-    `;
-
-    card.appendChild(left);
-    card.appendChild(right);
-    wrap.appendChild(card);
-  }
-}
-
-function renderInvoices() {
-  const wrap = $('#invoicesContainer');
-  const empty = $('#emptyInvoices');
-  const countEl = $('#invoicesCount');
-  const q = ($('#searchInput').value || '').trim().toLowerCase();
-
-  const filtered = state.invoices.filter(i => {
-    const id = (i.id || '').toLowerCase();
-    const customerName = (i.customerName || '').toLowerCase();
-    return !q || id.includes(q) || customerName.includes(q);
-  });
-
-  countEl.textContent = `${filtered.length} فاتورة`;
-
-  wrap.innerHTML = '';
-  if (!filtered.length) {
-    empty.classList.remove('hidden');
-    return;
-  }
-  empty.classList.add('hidden');
-
-  for (const i of filtered) {
-    const card = document.createElement('div');
-    card.className = 'product-card rounded-lg p-3 flex items-center justify-between';
-
-    const left = document.createElement('div');
-    left.className = 'flex-1';
-    left.innerHTML = `
-      <div class="font-semibold text-gray-900 mb-1">فاتورة #${i.id || '—'}</div>
-      <div class="text-sm text-gray-500 flex items-center gap-2">
-        <i class="fas fa-user"></i>
-        ${i.customerName || 'عميل نقدي'}
-      </div>
-      ${i.date ? `<div class="text-xs text-gray-400 mt-1">${new Date(i.date).toLocaleDateString('ar-EG')}</div>` : ''}
-    `;
-
-    const right = document.createElement('div');
-    right.className = 'text-left';
-    right.innerHTML = `
-      <div class="text-lg font-bold text-purple-600">${(i.total || 0).toFixed(2)}</div>
-      <div class="text-xs text-gray-500">ج.م</div>
-    `;
-
-    card.appendChild(left);
-    card.appendChild(right);
-    wrap.appendChild(card);
-  }
-}
-
-function renderExpenses() {
-  const wrap = $('#expensesContainer');
-  const empty = $('#emptyExpenses');
-  const countEl = $('#expensesCount');
-  const q = ($('#searchInput').value || '').trim().toLowerCase();
-
-  const filtered = state.expenses.filter(e => {
-    const description = (e.description || '').toLowerCase();
-    const category = (e.category || '').toLowerCase();
-    return !q || description.includes(q) || category.includes(q);
-  });
-
-  countEl.textContent = `${filtered.length} مصروف`;
-
-  wrap.innerHTML = '';
-  if (!filtered.length) {
-    empty.classList.remove('hidden');
-    return;
-  }
-  empty.classList.add('hidden');
-
-  for (const e of filtered) {
-    const card = document.createElement('div');
-    card.className = 'product-card rounded-lg p-3 flex items-center justify-between';
-
-    const left = document.createElement('div');
-    left.className = 'flex-1';
-    left.innerHTML = `
-      <div class="font-semibold text-gray-900 mb-1">${e.description || '—'}</div>
-      <div class="text-sm text-gray-500 flex items-center gap-2">
-        <i class="fas fa-tag"></i>
-        ${e.category || '—'}
-      </div>
-      ${e.date ? `<div class="text-xs text-gray-400 mt-1">${new Date(e.date).toLocaleDateString('ar-EG')}</div>` : ''}
-    `;
-
-    const right = document.createElement('div');
-    right.className = 'text-left';
-    right.innerHTML = `
-      <div class="text-lg font-bold text-red-600">${(e.amount || 0).toFixed(2)}</div>
-      <div class="text-xs text-gray-500">ج.م</div>
-    `;
-
-    card.appendChild(left);
-    card.appendChild(right);
-    wrap.appendChild(card);
-  }
-}
-
-async function fetchAllData() {
+async function fetchProducts() {
   const s = state.settings || {};
   if (!state.syncDb || !s.prefix) return;
-  
   try {
-    // Fetch all collections in parallel
-    const [productsSnap, customersSnap, invoicesSnap, expensesSnap] = await Promise.all([
-      getDocs(collection(state.syncDb, `${s.prefix}_products`)),
-      getDocs(collection(state.syncDb, `${s.prefix}_customers`)),
-      getDocs(collection(state.syncDb, `${s.prefix}_invoices`)),
-      getDocs(collection(state.syncDb, `${s.prefix}_expenses`))
-    ]);
-
-    // Update state
-    state.products = [];
-    productsSnap.forEach(doc => state.products.push(doc.data()));
-    
-    state.customers = [];
-    customersSnap.forEach(doc => state.customers.push(doc.data()));
-    
-    state.invoices = [];
-    invoicesSnap.forEach(doc => state.invoices.push(doc.data()));
-    
-    state.expenses = [];
-    expensesSnap.forEach(doc => state.expenses.push(doc.data()));
-
-    // Render current tab
-    renderCurrentTab();
-    
-    const totalItems = state.products.length + state.customers.length + state.invoices.length + state.expenses.length;
-    if (totalItems > 0) {
-      toast(`تم تحديث ${totalItems} عنصر`, 'success');
+    const productsRef = collection(state.syncDb, `${s.prefix}_products`);
+    const snap = await getDocs(productsRef);
+    const list = [];
+    snap.forEach(doc => list.push(doc.data()));
+    state.products = list;
+    renderProducts();
+    // Only show success toast if products were actually loaded
+    if (list.length > 0) {
+      toast('تم تحديث المنتجات', 'success');
     }
   } catch (e) {
     console.error(e);
-    toast('فشل تحميل البيانات', 'error');
+    toast('فشل تحميل المنتجات', 'error');
   }
 }
 
@@ -463,17 +270,14 @@ function startScannerSessionListener() {
 
   if (state.unsubscribeScan) state.unsubscribeScan();
   
-  let isInitialLoad = true;
   state.unsubscribeScan = onSnapshot(qSessions, (snap) => {
-    if (isInitialLoad) {
-      isInitialLoad = false;
-      return; // Skip initial load to prevent auto-opening camera
-    }
-    
+    // Process all pending scan requests, including on initial load
     snap.docChanges().forEach(change => {
       if (change.type === 'added' || change.type === 'modified') {
         const data = change.doc.data();
         if (data && data.type === 'scanBarcode' && data.status === 'pending') {
+          toast('تم استلام طلب مسح من النظام', 'info');
+          
           // mark scanning
           setDoc(doc(state.scannerDb, 'scannerSessions', change.doc.id), {
             status: 'scanning', updatedAt: serverTimestamp()
@@ -503,18 +307,15 @@ function startFixedScannerCompatListener() {
   if (!state.scannerDb) return;
   const fixedRef = doc(state.scannerDb, 'scannerSessions', 'fixed');
   let processing = false;
-  let isInitialLoad = true;
   
   onSnapshot(fixedRef, (snap) => {
     const data = snap.data() || {};
     
-    if (isInitialLoad) {
-      isInitialLoad = false;
-      return; // Skip initial load to prevent auto-opening camera
-    }
-    
+    // Check for scan requests immediately, including on initial load
     if (data.status === 'scanRequested' && !processing) {
       processing = true;
+      toast('تم استلام طلب مسح من النظام', 'info');
+      
       openScannerUI(async (value) => {
         try {
           await setDoc(fixedRef, { status: 'scanned', scannedValue: value, updatedAt: serverTimestamp() }, { merge: true });
@@ -533,12 +334,6 @@ function startFixedScannerCompatListener() {
 }
 
 function bindUI() {
-  // Tab switching
-  $('#tabProducts').onclick = () => switchTab('products');
-  $('#tabCustomers').onclick = () => switchTab('customers');
-  $('#tabInvoices').onclick = () => switchTab('invoices');
-  $('#tabExpenses').onclick = () => switchTab('expenses');
-
   // Settings modal
   const modal = $('#settingsModal');
   const openBtn = $('#openSettingsBtn');
@@ -562,21 +357,21 @@ function bindUI() {
     await initFirebaseApps();
     startScannerSessionListener();
     startFixedScannerCompatListener();
-    fetchAllData();
+    fetchProducts();
   };
 
   $('#testConnBtn').onclick = testConnection;
 
   // Search
-  $('#searchInput').addEventListener('input', renderCurrentTab);
+  $('#searchInput').addEventListener('input', renderProducts);
 
   // Refresh
-  $('#refreshBtn').onclick = fetchAllData;
+  $('#refreshBtn').onclick = fetchProducts;
 
   // Manual scanner
   $('#openScannerBtn').onclick = () => openScannerUI((value) => {
     $('#searchInput').value = value;
-    renderCurrentTab();
+    renderProducts();
   });
 
   $('#closeScannerBtn').onclick = closeScannerUI;
@@ -591,13 +386,79 @@ function fillSettingsForm() {
   $('#deviceId').value = s.deviceId || '';
 }
 
+// Check for existing pending scan requests on startup
+async function checkPendingScanRequests() {
+  const s = state.settings || {};
+  if (!state.scannerDb) return;
+  
+  try {
+    // Check fixed scanner session first
+    const fixedRef = doc(state.scannerDb, 'scannerSessions', 'fixed');
+    const fixedSnap = await getDoc(fixedRef);
+    
+    if (fixedSnap.exists()) {
+      const data = fixedSnap.data();
+      if (data && data.status === 'scanRequested') {
+        toast('تم العثور على طلب مسح معلق', 'info');
+        openScannerUI(async (value) => {
+          try {
+            await setDoc(fixedRef, { status: 'scanned', scannedValue: value, updatedAt: serverTimestamp() }, { merge: true });
+            toast('تم المسح بنجاح', 'success');
+          } catch (e) {
+            console.error('fixed compat write error', e);
+            toast('فشل إرسال نتيجة المسح', 'error');
+          }
+        });
+        return; // Exit early if we found a fixed request
+      }
+    }
+    
+    // Check device-specific scanner sessions
+    if (s.deviceId) {
+      const sessionsCol = collection(state.scannerDb, 'scannerSessions');
+      const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'pending'));
+      const snap = await getDocs(qSessions);
+      
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        const data = docSnap.data();
+        if (data && data.type === 'scanBarcode') {
+          toast('تم العثور على طلب مسح معلق', 'info');
+          
+          // mark scanning
+          await setDoc(docSnap.ref, {
+            status: 'scanning', updatedAt: serverTimestamp()
+          }, { merge: true });
+
+          openScannerUI(async (value) => {
+            try {
+              await setDoc(docSnap.ref, {
+                status: 'done', barcode: value, updatedAt: serverTimestamp()
+              }, { merge: true });
+              toast('تم المسح بنجاح', 'success');
+            } catch (e) {
+              console.error(e);
+              toast('فشل إرسال نتيجة المسح', 'error');
+            }
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error checking pending scan requests:', e);
+  }
+}
+
 async function boot() {
   state.settings = loadSettings();
   bindUI();
   await initFirebaseApps();
   startScannerSessionListener();
   startFixedScannerCompatListener();
-  fetchAllData();
+  fetchProducts();
+  
+  // Check for pending scan requests after initialization
+  setTimeout(() => checkPendingScanRequests(), 1000);
 }
 
 boot();
