@@ -43,13 +43,17 @@ function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
 function toast(msg, type = 'info') {
   const host = $('#toasts');
   const el = document.createElement('div');
-  el.className = `toast flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl text-white backdrop-blur-md bg-black/40 border border-white/20 max-w-sm`;
+  el.className = `toast flex items-center gap-3 px-3 py-2 rounded-lg shadow-lg text-white backdrop-blur-sm ${
+    type === 'error' ? 'bg-red-500' : 
+    type === 'success' ? 'bg-green-500' : 
+    'bg-blue-500'
+  } max-w-sm`;
   
   const iconEl = document.createElement('i');
-  iconEl.className = `ph text-lg ${
-    type === 'error' ? 'ph-x-circle text-red-400' : 
-    type === 'success' ? 'ph-check-circle text-green-400' : 
-    'ph-info text-blue-400'
+  iconEl.className = `fas text-sm ${
+    type === 'error' ? 'fa-exclamation-circle' : 
+    type === 'success' ? 'fa-check-circle' : 
+    'fa-info-circle'
   }`;
   
   const text = document.createElement('div');
@@ -57,9 +61,9 @@ function toast(msg, type = 'info') {
   text.textContent = msg;
   
   const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = '<i class="ph ph-x text-sm"></i>';
-  closeBtn.className = 'p-1 rounded-lg hover:bg-white/20 transition-all';
-  closeBtn.onclick = () => { el.classList.add('hide'); setTimeout(()=>el.remove(),200); };
+  closeBtn.innerHTML = '<i class="fas fa-times text-xs"></i>';
+  closeBtn.className = 'p-1 rounded hover:bg-white/20 transition-all';
+  closeBtn.onclick = () => { el.classList.add('hide'); setTimeout(()=>el.remove(),150); };
   
   el.appendChild(iconEl); 
   el.appendChild(text); 
@@ -68,18 +72,18 @@ function toast(msg, type = 'info') {
   
   setTimeout(() => { 
     el.classList.add('hide'); 
-    setTimeout(()=>el.remove(),200); 
-  }, 4000);
+    setTimeout(()=>el.remove(),150); 
+  }, 3500);
 }
 
 function updateStatus(connected, label) {
   const el = $('#syncStatus');
   if (connected) {
-    el.innerHTML = `<i class="ph ph-check-circle text-green-400 me-1"></i>${label || 'متصل'}`;
-    el.className = 'px-3 py-1 rounded-full glass text-xs font-medium text-green-300';
+    el.innerHTML = `<i class="fas fa-check-circle text-green-500 me-1"></i>${label || 'متصل'}`;
+    el.className = 'px-2 py-1 rounded-full bg-green-50 text-xs font-medium text-green-700';
   } else {
-    el.innerHTML = `<i class="ph ph-x-circle text-red-400 me-1"></i>${label || 'غير متصل'}`;
-    el.className = 'px-3 py-1 rounded-full glass-dark text-xs font-medium text-red-300';
+    el.innerHTML = `<i class="fas fa-times-circle text-red-500 me-1"></i>${label || 'غير متصل'}`;
+    el.className = 'px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-600';
   }
 }
 
@@ -152,24 +156,24 @@ function renderProducts() {
 
   for (const p of filtered) {
     const card = document.createElement('div');
-    card.className = 'product-card rounded-2xl p-4 flex items-center justify-between text-gray-800';
+    card.className = 'product-card rounded-lg p-3 flex items-center justify-between';
 
     const left = document.createElement('div');
     left.className = 'flex-1';
     left.innerHTML = `
-      <div class="font-semibold text-lg mb-1">${p.name || '—'}</div>
-      <div class="text-sm opacity-70 flex items-center gap-2">
-        <i class="ph ph-barcode"></i>
+      <div class="font-semibold text-gray-900 mb-1">${p.name || '—'}</div>
+      <div class="text-sm text-gray-500 flex items-center gap-2">
+        <i class="fas fa-barcode"></i>
         ${p.barcode || '—'}
       </div>
-      ${p.supplier ? `<div class="text-xs opacity-60 mt-1">${p.supplier}</div>` : ''}
+      ${p.supplier ? `<div class="text-xs text-gray-400 mt-1">${p.supplier}</div>` : ''}
     `;
 
     const right = document.createElement('div');
     right.className = 'text-left';
     right.innerHTML = `
-      <div class="text-2xl font-bold text-indigo-600">${(p.price || 0).toFixed(2)}</div>
-      <div class="text-sm opacity-70">ج.م</div>
+      <div class="text-lg font-bold text-blue-600">${(p.price || 0).toFixed(2)}</div>
+      <div class="text-xs text-gray-500">ج.م</div>
     `;
 
     card.appendChild(left);
@@ -229,7 +233,7 @@ function closeScannerUI() {
   const overlay = $('#scannerSection');
   overlay.classList.remove('scanner-enter');
   overlay.classList.add('scanner-leave');
-  setTimeout(()=>{ overlay.classList.add('hidden'); overlay.classList.remove('scanner-leave'); }, 200);
+  setTimeout(()=>{ overlay.classList.add('hidden'); overlay.classList.remove('scanner-leave'); }, 150);
   if (html5QrcodeScannerInstance) {
     html5QrcodeScannerInstance.stop().then(() => html5QrcodeScannerInstance.clear()).catch(() => {});
     html5QrcodeScannerInstance = null;

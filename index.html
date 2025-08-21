@@ -5,70 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>YSK SALES | موبايل</title>
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#6366f1" />
-  <link rel="icon" type="image/png" href="/public/YSK-SALES.png" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" type="image/png" href="/YSK-SALES.png" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { 
-      font-family: 'Inter', 'Cairo', sans-serif; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+      font-family: 'Cairo', sans-serif; 
+      background-color: #f8fafc;
     }
     
     .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .glass-dark {
-      background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+      transition: all 0.2s ease;
     }
     
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
     
     .btn-success {
-      background: linear-gradient(135deg, #48cc6c 0%, #2dd4bf 100%);
-      box-shadow: 0 4px 15px rgba(72, 204, 108, 0.4);
-      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
     }
     
     .btn-success:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(72, 204, 108, 0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
     }
 
     .product-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      transition: all 0.3s ease;
+      background: white;
+      border: 1px solid #e5e7eb;
+      transition: all 0.2s ease;
     }
     
     .product-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border-color: #d1d5db;
     }
 
     /* Scanner modal animations */
     @keyframes modal-in { 
       from { 
-        transform: scale(0.9) translateY(20px); 
+        transform: scale(0.95) translateY(10px); 
         opacity: 0; 
       } 
       to { 
@@ -83,71 +82,64 @@
         opacity: 1; 
       } 
       to { 
-        transform: scale(0.9) translateY(20px); 
+        transform: scale(0.95) translateY(10px); 
         opacity: 0; 
       } 
     }
     
-    #scannerSection.scanner-enter .scanner-card { animation: modal-in 300ms ease-out; }
-    #scannerSection.scanner-leave .scanner-card { animation: modal-out 200ms ease-in forwards; }
+    #scannerSection.scanner-enter .scanner-card { animation: modal-in 200ms ease-out; }
+    #scannerSection.scanner-leave .scanner-card { animation: modal-out 150ms ease-in forwards; }
 
     /* Toast animations */
     @keyframes toast-in { 
       from { 
-        transform: translateX(100%) scale(0.8); 
+        transform: translateY(20px); 
         opacity: 0; 
       } 
       to { 
-        transform: translateX(0) scale(1); 
+        transform: translateY(0); 
         opacity: 1; 
       } 
     }
     
     @keyframes toast-out { 
       from { 
-        transform: translateX(0) scale(1); 
+        transform: translateY(0); 
         opacity: 1; 
       } 
       to { 
-        transform: translateX(100%) scale(0.8); 
+        transform: translateY(20px); 
         opacity: 0; 
       } 
     }
     
-    .toast { animation: toast-in 300ms ease-out; }
-    .toast.hide { animation: toast-out 200ms ease-in forwards; }
-    
-    .floating-action {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 40;
-    }
+    .toast { animation: toast-in 200ms ease-out; }
+    .toast.hide { animation: toast-out 150ms ease-in forwards; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 </head>
-<body class="text-white">
+<body class="bg-gray-50 text-gray-800">
   <!-- App Shell -->
   <div id="app" class="min-h-screen">
     <!-- Top Bar -->
-    <header class="sticky top-0 z-20 glass">
-      <div class="max-w-lg mx-auto px-6 py-4">
+    <header class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+      <div class="max-w-lg mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl glass flex items-center justify-center">
-              <img src="/public/YSK-SALES.png" alt="logo" class="w-6 h-6" />
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <img src="/YSK-SALES.png" alt="logo" class="w-5 h-5" />
             </div>
             <div>
-              <h1 class="text-xl font-bold">YSK SALES</h1>
-              <p class="text-xs opacity-80">نظام إدارة المبيعات</p>
+              <h1 class="text-lg font-bold text-gray-900">YSK SALES</h1>
+              <p class="text-xs text-gray-500">نظام إدارة المبيعات</p>
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <div id="syncStatus" class="px-3 py-1 rounded-full glass-dark text-xs font-medium">
-              غير متصل
+          <div class="flex items-center gap-2">
+            <div id="syncStatus" class="px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-600">
+              <i class="fas fa-times-circle text-red-500 me-1"></i>غير متصل
             </div>
-            <button id="openSettingsBtn" class="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-white/20 transition-all">
-              <i class="ph ph-gear-six text-xl"></i>
+            <button id="openSettingsBtn" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-all">
+              <i class="fas fa-cog text-gray-600"></i>
             </button>
           </div>
         </div>
@@ -155,15 +147,15 @@
     </header>
 
     <!-- Content -->
-    <main class="max-w-lg mx-auto px-6 py-6 space-y-6">
+    <main class="max-w-lg mx-auto px-4 py-4 space-y-4">
       <!-- Quick Actions -->
-      <div class="grid grid-cols-2 gap-4">
-        <button id="refreshBtn" class="btn-primary text-white rounded-2xl py-4 px-6 flex items-center justify-center gap-3 font-medium">
-          <i class="ph ph-arrows-clockwise text-xl"></i>
-          تحديث البيانات
+      <div class="grid grid-cols-2 gap-3">
+        <button id="refreshBtn" class="btn-primary text-white rounded-lg py-3 px-4 flex items-center justify-center gap-2 text-sm font-medium">
+          <i class="fas fa-sync-alt"></i>
+          تحديث
         </button>
-        <button id="openScannerBtn" class="btn-success text-white rounded-2xl py-4 px-6 flex items-center justify-center gap-3 font-medium">
-          <i class="ph ph-barcode text-xl"></i>
+        <button id="openScannerBtn" class="btn-success text-white rounded-lg py-3 px-4 flex items-center justify-center gap-2 text-sm font-medium">
+          <i class="fas fa-qrcode"></i>
           مسح باركود
         </button>
       </div>
@@ -171,51 +163,51 @@
       <!-- Search -->
       <div class="relative">
         <input id="searchInput" type="text" placeholder="ابحث عن المنتجات..." 
-               class="w-full rounded-2xl glass py-4 px-6 pe-14 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30" />
-        <div class="absolute left-5 top-1/2 -translate-y-1/2">
-          <i class="ph ph-magnifying-glass text-xl opacity-70"></i>
+               class="w-full rounded-lg border border-gray-300 bg-white py-3 px-4 pe-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <div class="absolute left-3 top-1/2 -translate-y-1/2">
+          <i class="fas fa-search text-gray-400"></i>
         </div>
       </div>
 
       <!-- Products List -->
-      <section class="space-y-4">
+      <section class="space-y-3">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">المنتجات المتاحة</h2>
-          <div id="productsCount" class="px-3 py-1 rounded-full glass-dark text-sm">0 منتج</div>
+          <h2 class="text-base font-semibold text-gray-900">المنتجات المتاحة</h2>
+          <div id="productsCount" class="px-2 py-1 rounded-full bg-blue-50 text-xs font-medium text-blue-700">0 منتج</div>
         </div>
-        <div id="productsContainer" class="space-y-3"></div>
-        <div id="emptyState" class="hidden text-center py-16">
-          <div class="glass rounded-3xl p-8">
-            <i class="ph ph-package text-6xl opacity-50 mb-4"></i>
-            <p class="text-lg font-medium mb-2">لا توجد منتجات</p>
-            <p class="opacity-70">تأكد من إعدادات المزامنة</p>
+        <div id="productsContainer" class="space-y-2"></div>
+        <div id="emptyState" class="hidden text-center py-12">
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+            <p class="text-base font-medium text-gray-900 mb-1">لا توجد منتجات</p>
+            <p class="text-sm text-gray-500">تأكد من إعدادات المزامنة</p>
           </div>
         </div>
       </section>
 
       <!-- Scanner Overlay Modal -->
       <div id="scannerSection" class="fixed inset-0 hidden z-50">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
-        <div class="relative w-full h-full p-6 flex items-center justify-center">
-          <div class="scanner-card w-full max-w-md glass rounded-3xl overflow-hidden">
-            <div class="p-6 border-b border-white/20">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative w-full h-full p-4 flex items-center justify-center">
+          <div class="scanner-card w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-gray-200">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl glass-dark flex items-center justify-center">
-                    <i class="ph ph-barcode text-xl"></i>
+                  <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <i class="fas fa-qrcode text-blue-600"></i>
                   </div>
                   <div>
-                    <h3 class="font-bold text-lg">ماسح الباركود</h3>
-                    <p class="text-sm opacity-70">وجه الكاميرا نحو الباركود</p>
+                    <h3 class="font-semibold text-gray-900">ماسح الباركود</h3>
+                    <p class="text-xs text-gray-500">وجه الكاميرا نحو الباركود</p>
                   </div>
                 </div>
-                <button id="closeScannerBtn" class="w-10 h-10 rounded-xl glass-dark flex items-center justify-center hover:bg-white/20 transition-all">
-                  <i class="ph ph-x text-xl"></i>
+                <button id="closeScannerBtn" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-all">
+                  <i class="fas fa-times text-gray-600"></i>
                 </button>
               </div>
             </div>
-            <div class="p-6">
-              <div id="reader" class="w-full h-64 rounded-2xl overflow-hidden bg-black/20"></div>
+            <div class="p-4">
+              <div id="reader" class="w-full h-48 rounded-lg overflow-hidden bg-gray-100"></div>
             </div>
           </div>
         </div>
@@ -226,58 +218,58 @@
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 hidden items-center justify-center z-50">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-md mx-6 glass rounded-3xl overflow-hidden">
-      <div class="p-6 border-b border-white/20">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-sm mx-4 bg-white rounded-2xl overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl glass-dark flex items-center justify-center">
-              <i class="ph ph-gear-six text-xl"></i>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <i class="fas fa-cog text-blue-600"></i>
             </div>
             <div>
-              <h3 class="font-bold text-lg">إعدادات Firebase</h3>
-              <p class="text-sm opacity-70">ربط التطبيق بقاعدة البيانات</p>
+              <h3 class="font-semibold text-gray-900">إعدادات Firebase</h3>
+              <p class="text-xs text-gray-500">ربط التطبيق بقاعدة البيانات</p>
             </div>
           </div>
-          <button id="closeSettingsBtn" class="w-10 h-10 rounded-xl glass-dark flex items-center justify-center hover:bg-white/20 transition-all">
-            <i class="ph ph-x text-xl"></i>
+          <button id="closeSettingsBtn" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-all">
+            <i class="fas fa-times text-gray-600"></i>
           </button>
         </div>
       </div>
       
-      <div class="p-6 space-y-6">
-        <div class="glass-dark rounded-2xl p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <i class="ph ph-info text-lg text-blue-300"></i>
-            <span class="text-sm font-medium">معلومات مهمة</span>
+      <div class="p-4 space-y-4">
+        <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-info-circle text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-900">معلومات مهمة</span>
           </div>
-          <p class="text-sm opacity-80 leading-relaxed">
+          <p class="text-xs text-blue-800 leading-relaxed">
             أدخل إعدادات Firebase مرة واحدة وسيتم استخدامها للمزامنة وجلسات المسح معاً.
           </p>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-3">
           <div>
-            <label class="block text-sm font-medium mb-2 opacity-90">مزامنة البيانات</label>
-            <div class="space-y-3">
-              <input id="syncApiKey" class="w-full rounded-xl glass-dark py-3 px-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30" placeholder="API Key" />
-              <input id="syncAuthDomain" class="w-full rounded-xl glass-dark py-3 px-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30" placeholder="Auth Domain" />
-              <input id="syncProjectId" class="w-full rounded-xl glass-dark py-3 px-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30" placeholder="Project ID" />
-              <input id="prefix" class="w-full rounded-xl glass-dark py-3 px-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30" placeholder="Prefix (مثال: store1)" />
+            <label class="block text-sm font-medium text-gray-700 mb-2">مزامنة البيانات</label>
+            <div class="space-y-2">
+              <input id="syncApiKey" class="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="API Key" />
+              <input id="syncAuthDomain" class="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Auth Domain" />
+              <input id="syncProjectId" class="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Project ID" />
+              <input id="prefix" class="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Prefix (مثال: store1)" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2 opacity-90">إعدادات إضافية</label>
-            <input id="deviceId" class="w-full rounded-xl glass-dark py-3 px-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30" placeholder="Device ID (يُولد تلقائياً)" />
+            <label class="block text-sm font-medium text-gray-700 mb-2">إعدادات إضافية</label>
+            <input id="deviceId" class="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Device ID (يُولد تلقائياً)" />
           </div>
         </div>
 
-        <div class="flex gap-3 pt-4">
-          <button id="testConnBtn" class="flex-1 py-3 px-4 rounded-xl glass-dark font-medium hover:bg-white/20 transition-all">
+        <div class="flex gap-2 pt-2">
+          <button id="testConnBtn" class="flex-1 py-2 px-3 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-all">
             اختبار الاتصال
           </button>
-          <button id="saveSettingsBtn" class="flex-1 btn-primary text-white py-3 px-4 rounded-xl font-medium">
+          <button id="saveSettingsBtn" class="flex-1 btn-primary text-white py-2 px-3 rounded-lg text-sm font-medium">
             حفظ الإعدادات
           </button>
         </div>
@@ -286,7 +278,7 @@
   </div>
 
   <!-- Toasts -->
-  <div id="toasts" class="fixed top-20 left-4 right-4 sm:left-auto sm:right-4 z-50 space-y-3"></div>
+  <div id="toasts" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-50 space-y-2"></div>
 
   <script>
     // Register service worker
