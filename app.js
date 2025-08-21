@@ -131,9 +131,10 @@ async function testConnection() {
 
 function renderProducts() {
   const wrap = $('#productsContainer');
-  const empty = $('#emptyState');
+  const empty = $('#emptyProducts'); // تصحيح اسم العنصر
   const countEl = $('#productsCount');
-  const q = ($('#searchInput').value || '').trim().toLowerCase();
+  const searchInput = $('#searchInput');
+  const q = (searchInput ? searchInput.value || '' : '').trim().toLowerCase();
 
   const filtered = state.products.filter(p => {
     const name = (p.name || '').toLowerCase();
@@ -142,14 +143,14 @@ function renderProducts() {
     return !q || name.includes(q) || barcode.includes(q) || supplier.includes(q);
   });
 
-  countEl.textContent = `${filtered.length} منتج`;
+  if (countEl) countEl.textContent = `${filtered.length} منتج`;
 
-  wrap.innerHTML = '';
+  if (wrap) wrap.innerHTML = '';
   if (!filtered.length) {
-    empty.classList.remove('hidden');
+    if (empty) empty.classList.remove('hidden');
     return;
   }
-  empty.classList.add('hidden');
+  if (empty) empty.classList.add('hidden');
 
   for (const p of filtered) {
     const card = document.createElement('div');
@@ -201,8 +202,21 @@ async function fetchProducts() {
 
 // Manual scanner UI
 let html5QrcodeScannerInstance = null;
+let isScanning = false;
+
 function openScannerUI(onResult) {
+  // Prevent multiple scanner instances
+  if (isScanning) {
+    console.log('Scanner already running');
+    return;
+  }
+  
   const overlay = $('#scannerSection');
+  if (!overlay) {
+    console.error('Scanner overlay not found');
+    return;
+  }
+  
   overlay.classList.remove('hidden');
   overlay.classList.remove('scanner-leave');
   overlay.classList.add('scanner-enter');
@@ -224,34 +238,84 @@ function openScannerUI(onResult) {
     rememberLastUsedCamera: true
   };
 
+  // Clean up any existing instance
   if (html5QrcodeScannerInstance) {
-    html5QrcodeScannerInstance.clear().catch(() => {});
+    try {
+      html5QrcodeScannerInstance.clear();
+    } catch (e) {
+      console.log('Error clearing previous scanner:', e);
+    }
     html5QrcodeScannerInstance = null;
   }
 
-  // eslint-disable-next-line no-undef
-  html5QrcodeScannerInstance = new Html5Qrcode(readerId);
-  html5QrcodeScannerInstance.start(
-    { facingMode: 'environment' },
-    config,
-    (decodedText) => {
-      try { onResult(decodedText); } finally { closeScannerUI(); }
-    },
-    () => {}
-  ).catch((err) => {
-    console.error('scanner error', err);
-    toast('تعذر فتح الكاميرا', 'error');
-  });
+  // Check if Html5Qrcode is available
+  if (typeof Html5Qrcode === 'undefined') {
+    console.error('Html5Qrcode library not loaded');
+    toast('مكتبة المسح غير متاحة', 'error');
+    return;
+  }
+
+  try {
+    html5QrcodeScannerInstance = new Html5Qrcode(readerId);
+    isScanning = true;
+    
+    html5QrcodeScannerInstance.start(
+      { facingMode: 'environment' },
+      config,
+      (decodedText) => {
+        try { 
+          onResult(decodedText); 
+        } finally { 
+          closeScannerUI(); 
+        }
+      },
+      () => {} // Error callback - ignore scan errors
+    ).catch((err) => {
+      console.error('scanner error', err);
+      toast('تعذر فتح الكاميرا', 'error');
+      isScanning = false;
+      closeScannerUI();
+    });
+  } catch (err) {
+    console.error('Failed to create scanner instance:', err);
+    toast('فشل في إنشاء ماسح الباركود', 'error');
+    isScanning = false;
+  }
 }
 
 function closeScannerUI() {
   const overlay = $('#scannerSection');
-  overlay.classList.remove('scanner-enter');
-  overlay.classList.add('scanner-leave');
-  setTimeout(()=>{ overlay.classList.add('hidden'); overlay.classList.remove('scanner-leave'); }, 150);
-  if (html5QrcodeScannerInstance) {
-    html5QrcodeScannerInstance.stop().then(() => html5QrcodeScannerInstance.clear()).catch(() => {});
-    html5QrcodeScannerInstance = null;
+  if (overlay) {
+    overlay.classList.remove('scanner-enter');
+    overlay.classList.add('scanner-leave');
+    setTimeout(() => { 
+      overlay.classList.add('hidden'); 
+      overlay.classList.remove('scanner-leave'); 
+    }, 150);
+  }
+  
+  if (html5QrcodeScannerInstance && isScanning) {
+    try {
+      html5QrcodeScannerInstance.stop()
+        .then(() => {
+          if (html5QrcodeScannerInstance) {
+            html5QrcodeScannerInstance.clear();
+          }
+        })
+        .catch((err) => {
+          console.log('Error stopping scanner:', err);
+        })
+        .finally(() => {
+          html5QrcodeScannerInstance = null;
+          isScanning = false;
+        });
+    } catch (err) {
+      console.log('Error in closeScannerUI:', err);
+      html5QrcodeScannerInstance = null;
+      isScanning = false;
+    }
+  } else {
+    isScanning = false;
   }
 }
 
@@ -398,7 +462,13 @@ async function checkPendingScanRequests() {
     
     if (fixedSnap.exists()) {
       const data = fixedSnap.data();
-      if (data && data.status === 'scanRequested') {
+      // Only process recent requests (within last 5 minutes) to avoid old stale requests
+      const requestTime = data.requestedAt?.toDate?.() || new Date(data.requestedAt || 0);
+      const now = new Date();
+      const timeDiff = now - requestTime;
+      const fiveMinutes = 5 * 60 * 1000;
+      
+      if (data && data.status === 'scanRequested' && timeDiff < fiveMinutes) {
         toast('تم العثور على طلب مسح معلق', 'info');
         openScannerUI(async (value) => {
           try {
@@ -409,7 +479,11 @@ async function checkPendingScanRequests() {
             toast('فشل إرسال نتيجة المسح', 'error');
           }
         });
-        return; // Exit early if we found a fixed request
+        return; // Exit early if we found a valid fixed request
+      } else if (data && data.status === 'scanRequested' && timeDiff >= fiveMinutes) {
+        // Clear old stale requests
+        await setDoc(fixedRef, { status: 'expired', updatedAt: serverTimestamp() }, { merge: true });
+        console.log('Cleared stale scan request');
       }
     }
     
@@ -422,7 +496,14 @@ async function checkPendingScanRequests() {
       if (!snap.empty) {
         const docSnap = snap.docs[0];
         const data = docSnap.data();
-        if (data && data.type === 'scanBarcode') {
+        
+        // Only process recent requests
+        const requestTime = data.createdAt?.toDate?.() || new Date(data.createdAt || 0);
+        const now = new Date();
+        const timeDiff = now - requestTime;
+        const fiveMinutes = 5 * 60 * 1000;
+        
+        if (data && data.type === 'scanBarcode' && timeDiff < fiveMinutes) {
           toast('تم العثور على طلب مسح معلق', 'info');
           
           // mark scanning
@@ -441,6 +522,12 @@ async function checkPendingScanRequests() {
               toast('فشل إرسال نتيجة المسح', 'error');
             }
           });
+        } else if (data && timeDiff >= fiveMinutes) {
+          // Clear old stale requests
+          await setDoc(docSnap.ref, {
+            status: 'expired', updatedAt: serverTimestamp()
+          }, { merge: true });
+          console.log('Cleared stale device scan request');
         }
       }
     }
