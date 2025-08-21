@@ -331,9 +331,9 @@ function startScannerSessionListener() {
     saveSettings({ deviceId: s.deviceId });
   }
 
-  // Listen to pending sessions targeted for this device
+  // Listen to scan requests targeted for this device
   const sessionsCol = collection(state.scannerDb, 'scannerSessions');
-  const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'pending'));
+  const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'scanRequested'));
 
   if (state.unsubscribeScan) state.unsubscribeScan();
   
@@ -342,7 +342,7 @@ function startScannerSessionListener() {
     snap.docChanges().forEach(change => {
       if (change.type === 'added' || change.type === 'modified') {
         const data = change.doc.data();
-        if (data && data.type === 'scanBarcode' && data.status === 'pending') {
+        if (data && data.type === 'scanBarcode' && data.status === 'scanRequested') {
           toast('تم استلام طلب مسح من النظام', 'info');
           
           // mark scanning
@@ -508,7 +508,7 @@ async function checkPendingScanRequests() {
     // Check device-specific scanner sessions
     if (s.deviceId) {
       const sessionsCol = collection(state.scannerDb, 'scannerSessions');
-      const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'pending'));
+      const qSessions = query(sessionsCol, where('deviceId', '==', s.deviceId), where('status', '==', 'scanRequested'));
       const snap = await getDocs(qSessions);
       
       if (!snap.empty) {
