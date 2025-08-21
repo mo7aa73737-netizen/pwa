@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>YSK Mobile PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" type="image/png" href="../YSK-SALES.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; }
+    .modal-bg { background-color: rgba(0,0,0,0.45); }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <!-- App Shell -->
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-200">
+      <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <img src="../YSK-SALES.png" alt="logo" class="w-8 h-8 rounded" />
+          <h1 class="text-lg font-bold text-gray-900">لوحة الموبايل</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="syncStatus" class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">غير متصل</span>
+          <button id="openSettingsBtn" class="p-2 rounded-lg hover:bg-gray-100" aria-label="الإعدادات">
+            <!-- Gear Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-700">
+              <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.844 1.57l-.124.783a8.286 8.286 0 00-1.737 1.004l-.74-.3a1.875 1.875 0 00-2.344 1.01l-.75 1.8a1.875 1.875 0 001.006 2.405l.7.3a8.388 8.388 0 000 2.008l-.7.3a1.875 1.875 0 00-1.006 2.405l.75 1.8a1.875 1.875 0 002.344 1.01l.74-.3c.54.4 1.12.739 1.737 1.004l.124.784c.145.906.927 1.569 1.844 1.569h1.875c.917 0 1.699-.663 1.844-1.57l.124-.783a8.286 8.286 0 001.737-1.004l.74.3a1.875 1.875 0 002.344-1.01l.75-1.8a1.875 1.875 0 00-1.006-2.405l-.7-.3a8.388 8.388 0 000-2.008l.7-.3a1.875 1.875 0 001.006-2.405l-.75-1.8a1.875 1.875 0 00-2.344-1.01l-.74.3a8.286 8.286 0 00-1.737-1.004l-.124-.784c-.145-.906-.927-1.569-1.844-1.569h-1.875zM12 15.375a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 max-w-lg mx-auto w-full px-4 py-4 space-y-4">
+      <!-- Actions Row -->
+      <div class="grid grid-cols-3 gap-2">
+        <button id="refreshBtn" class="col-span-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-blue-600 text-white shadow hover:bg-blue-700">
+          <!-- Refresh Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992m0 0V4.355m0 4.993l-3.181-3.18a8.25 8.25 0 10.66 10.912" />
+          </svg>
+          تحديث
+        </button>
+        <button id="openScannerBtn" class="col-span-2 flex items-center justify-center gap-2 py-2 rounded-lg bg-green-600 text-white shadow hover:bg-green-700">
+          <!-- Barcode Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+            <path d="M3.75 4.5A.75.75 0 014.5 3.75h15a.75.75 0 01.75.75v15a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75v-15zM6 8.25a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H6zm3 0a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H9zm3 0a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H12zm3 0a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H15zM6 12a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H6zm3 0a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H9zm3 0a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H12zm3 0a.75.75 0 000 1.5h.75a.75.75 0 000-1.5H15z" />
+          </svg>
+          مسح باركود
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="relative">
+        <input id="searchInput" type="text" placeholder="ابحث بالاسم أو الباركود أو المورد" class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pe-10 ps-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Products List -->
+      <section>
+        <div id="productsContainer" class="grid grid-cols-1 gap-2"></div>
+        <div id="emptyState" class="hidden text-center text-gray-500 py-10">لا توجد بيانات منتجات متاحة</div>
+      </section>
+
+      <!-- Scanner Container -->
+      <div id="scannerSection" class="hidden">
+        <div class="bg-white rounded-xl shadow p-3">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-gray-800">ماسح الباركود</h3>
+            <button id="closeScannerBtn" class="p-2 rounded-lg hover:bg-gray-100" aria-label="إغلاق">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-600">
+                <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div id="reader" class="w-full"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Spacer -->
+    <div class="h-6"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 hidden items-end sm:items-center justify-center modal-bg z-50">
+    <div class="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-base font-bold text-gray-800">إعدادات Firebase</h3>
+        <button id="closeSettingsBtn" class="p-2 rounded-lg hover:bg-gray-100" aria-label="إغلاق">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-600">
+            <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-blue-800 text-sm">
+          أدخل إعدادات المشروع للمزامنة (قراءة المنتجات) وإعدادات الماسح (جلسات المسح).
+        </div>
+        <!-- Sync Settings -->
+        <div class="space-y-2">
+          <h4 class="font-semibold text-gray-800">مزامنة البيانات</h4>
+          <div class="grid grid-cols-1 gap-2">
+            <input id="syncApiKey" class="input" placeholder="Sync API Key" />
+            <input id="syncAuthDomain" class="input" placeholder="Sync Auth Domain" />
+            <input id="syncProjectId" class="input" placeholder="Sync Project ID" />
+            <input id="prefix" class="input" placeholder="Prefix (مثال: store1)" />
+          </div>
+        </div>
+        <!-- Scanner Settings -->
+        <div class="space-y-2">
+          <h4 class="font-semibold text-gray-800">جلسات المسح</h4>
+          <div class="grid grid-cols-1 gap-2">
+            <input id="scannerApiKey" class="input" placeholder="Scanner API Key" />
+            <input id="scannerAuthDomain" class="input" placeholder="Scanner Auth Domain" />
+            <input id="scannerProjectId" class="input" placeholder="Scanner Project ID" />
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h4 class="font-semibold text-gray-800">اختياري</h4>
+          <input id="deviceId" class="input" placeholder="Device ID (يُولد تلقائياً)" />
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button id="testConnBtn" class="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800">اختبار الاتصال</button>
+          <button id="saveSettingsBtn" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">حفظ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toasts" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-50 space-y-2"></div>
+
+  <script>
+    // Tailwind shortcuts for inputs
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.input').forEach(el => {
+        el.className = 'w-full rounded-lg border border-gray-300 bg-white py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500';
+      });
+    });
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
