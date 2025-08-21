@@ -372,46 +372,56 @@ function startScannerSessionListener() {
 // Compatibility listener for legacy fixed doc (scannerSessions/fixed)
 function startFixedScannerCompatListener() {
   if (!state.scannerDb) {
-    console.log('Scanner DB not available for fixed listener');
+    console.log('❌ Scanner DB not available for fixed listener');
     return;
   }
   
-  console.log('Starting fixed scanner compatibility listener');
+  console.log('🔄 Starting fixed scanner compatibility listener');
   const fixedRef = doc(state.scannerDb, 'scannerSessions', 'fixed');
   let processing = false;
   
   onSnapshot(fixedRef, (snap) => {
     const data = snap.data() || {};
-    console.log('Fixed scanner listener received data:', data);
+    
+    // Only log important events
+    if (data.status === 'scanRequested') {
+      console.log('🔍 Fixed scan request received:', data);
+    }
     
     // Check for scan requests immediately, including on initial load
     if (data.status === 'scanRequested' && !processing) {
       processing = true;
-      console.log('Processing scan request from fixed listener');
+      console.log('📱 Processing scan request from fixed listener');
       toast('تم استلام طلب مسح من النظام', 'info');
       
-      openScannerUI(async (value) => {
-        console.log('Scanned value:', value);
-        try {
-          await setDoc(fixedRef, { status: 'scanned', scannedValue: value, updatedAt: serverTimestamp() }, { merge: true });
-          toast('تم المسح بنجاح', 'success');
-        } catch (e) {
-          console.error('fixed compat write error', e);
-          toast('فشل إرسال نتيجة المسح', 'error');
-        } finally {
-          setTimeout(() => { 
-            processing = false; 
-            console.log('Processing flag reset');
-          }, 500);
-        }
-      });
+      // Add a small delay to ensure UI is ready
+      setTimeout(() => {
+        openScannerUI(async (value) => {
+          console.log('✅ Scanned value:', value);
+          try {
+            await setDoc(fixedRef, { 
+              status: 'scanned', 
+              scannedValue: value, 
+              updatedAt: serverTimestamp(),
+              scannedAt: new Date()
+            }, { merge: true });
+            toast('تم المسح بنجاح', 'success');
+          } catch (e) {
+            console.error('❌ Fixed compat write error', e);
+            toast('فشل إرسال نتيجة المسح', 'error');
+          } finally {
+            setTimeout(() => { 
+              processing = false; 
+              console.log('🔄 Processing flag reset');
+            }, 1000); // Increased delay to prevent rapid re-processing
+          }
+        });
+      }, 200);
     } else if (data.status === 'scanRequested' && processing) {
-      console.log('Scan request already being processed');
-    } else {
-      console.log('No scan request or different status:', data.status);
+      console.log('⏳ Scan request already being processed');
     }
   }, (err) => {
-    console.error('fixed compat listener error', err);
+    console.error('❌ Fixed compat listener error', err);
   });
 }
 
@@ -558,12 +568,25 @@ async function boot() {
   state.settings = loadSettings();
   bindUI();
   await initFirebaseApps();
-  startScannerSessionListener();
-  startFixedScannerCompatListener();
-  fetchProducts();
   
-  // Check for pending scan requests after initialization
-  setTimeout(() => checkPendingScanRequests(), 1000);
+  // Ensure Firebase is initialized before starting listeners
+  if (state.scannerDb) {
+    console.log("✅ Firebase initialized, starting listeners...");
+    startScannerSessionListener();
+    startFixedScannerCompatListener();
+    fetchProducts();
+    
+    // Check for pending scan requests after initialization
+    setTimeout(() => checkPendingScanRequests(), 1000);
+  } else {
+    console.error("❌ Firebase not initialized. Please configure settings.");
+    toast("يرجى إدخال إعدادات Firebase للاتصال بالنظام", "error");
+    // Open settings modal automatically if settings are missing
+    const modal = $('#settingsModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    fillSettingsForm();
+  }
 }
 
 boot();
