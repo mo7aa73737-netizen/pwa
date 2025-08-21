@@ -103,7 +103,7 @@ async function initFirebaseApps() {
         projectId: s.syncProjectId,
       }, 'ysk-sync');
       state.syncDb = getFirestore(state.syncApp);
-      updateStatus(true, 'متصل ');
+      updateStatus(true, 'متصل ✅');
     } catch (e) {
       console.error('sync init error', e);
       updateStatus(false, 'فشل المزامنة');
@@ -123,7 +123,7 @@ async function testConnection() {
     if (state.syncDb && s.prefix) {
       const productsRef = collection(state.syncDb, `${s.prefix}_products`);
       await getDocs(query(productsRef, where('id', '!=', null)));
-      toast('اتصال Firebase ناجح ', 'success');
+      toast('اتصال Firebase ناجح ✅', 'success');
     } else {
       toast('من فضلك أدخل إعدادات المزامنة كاملة', 'error');
     }
